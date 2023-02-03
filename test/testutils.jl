@@ -1,4 +1,4 @@
-SKD = ScikitLearn.Skcore.pyimport("sklearn.datasets")
+const SKD = ScikitLearn.pyimport("sklearn.datasets")
 
 rmse(y, ŷ) = sqrt(sum(abs2, ŷ .- y) / length(y))
 

@@ -55,6 +55,7 @@ fparams = (
                    )
             continue
         end
+        println(mod)
         m = mod()
         # ratio of rmse to LS
         r, f = test_regression(m, X, y, ls)

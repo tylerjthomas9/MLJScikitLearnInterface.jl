@@ -138,7 +138,7 @@ function _skmodel_fit_reg(modelname, params)
             sksym, skmod, mdl = $(Symbol(modelname, "_"))
             # retrieve the namespace, if it's not there yet, import it
             parent = eval(sksym)
-            ispynull(parent) && ski!(parent, skmod)
+            pyisnull(parent) && ski!(parent, skmod)
             # retrieve the effective ScikitLearn constructor
             skconstr = getproperty(parent, mdl)
             # build the scikitlearn model passing all the parameters
@@ -170,7 +170,7 @@ function _skmodel_fit_clf(modelname, params)
             # See _skmodel_fit_reg, same story
             sksym, skmod, mdl = $(Symbol(modelname, "_"))
             parent = eval(sksym)
-            ispynull(parent) && ski!(parent, skmod)
+            pyisnull(parent) && ski!(parent, skmod)
             skconstr = getproperty(parent, mdl)
             skmodel = skconstr(
                         $((Expr(:kw, p, :(model.$p)) for p in params)...))
@@ -249,7 +249,7 @@ function _skmodel_fit_uns(modelname, params)
            # See _skmodel_fit_reg, same story
             sksym, skmod, mdl = $(Symbol(modelname, "_"))
             parent = eval(sksym)
-            ispynull(parent) && ski!(parent, skmod)
+            pyisnull(parent) && ski!(parent, skmod)
             skconstr = getproperty(parent, mdl)
             skmodel = skconstr(
                         $((Expr(:kw, p, :(model.$p)) for p in params)...))

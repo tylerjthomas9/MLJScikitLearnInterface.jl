@@ -131,7 +131,6 @@ const RidgeClassifier_ = sklm(:RidgeClassifier)
 @sk_clf mutable struct RidgeClassifier <: MMI.Deterministic
     alpha::Float64        = 1.0
     fit_intercept::Bool   = true
-    normalize::Bool       = false
     copy_X::Bool          = true
     max_iter::Option{Int} = nothing::(_ === nothing || _ > 0)
     tol::Float64          = 1e-3::(arg>0)
@@ -155,7 +154,6 @@ const RidgeCVClassifier_ = sklm(:RidgeClassifierCV)
 @sk_clf mutable struct RidgeCVClassifier <: MMI.Deterministic
     alphas::AbstractArray{Float64} = [0.1,1.0,10.0]::(all(0 .≤ _))
     fit_intercept::Bool   = true
-    normalize::Bool       = false
     scoring::Any          = nothing
     cv::Int               = 5
     class_weight::Any     = nothing
