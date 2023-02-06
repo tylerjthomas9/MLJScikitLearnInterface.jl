@@ -385,7 +385,7 @@ const RidgeCVRegressor_ = sklm(:RidgeCV)
     alphas::Any              = (0.1, 1.0, 10.0)::(all(_ .> 0))
     fit_intercept::Bool      = true
     scoring::Any             = nothing
-    cv::Any                  = 5
+    cv::Any                  = nothing
     gcv_mode::Option{String} = nothing::(_ === nothing || _ in ("auto","svd","eigen"))
     store_cv_values::Bool    = false
     alpha_per_target::Bool   = false
@@ -401,7 +401,7 @@ add_human_name_trait(RidgeCVRegressor, "ridge regressor $CV")
 # =============================================================================
 const SGDRegressor_ = sklm(:SGDRegressor)
 @sk_reg mutable struct SGDRegressor <: MMI.Deterministic
-    loss::String             = "squared_loss"::(_ in ("squared_loss","huber","epsilon_insensitive","squared_epsilon_insensitive"))
+    loss::String             = "squared_error"::(_ in ("squared_error","huber","epsilon_insensitive","squared_epsilon_insensitive"))
     penalty::String          = "l2"::(_ in ("none","l2","l1","elasticnet"))
     alpha::Float64           = 1e-4::(_ > 0)
     l1_ratio::Float64        = 0.15::(_ > 0)

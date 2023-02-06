@@ -8,7 +8,7 @@ const MMI = MLJModelInterface
 
 import ScikitLearn
 const SK = ScikitLearn
-import PythonCall: pyisnull, PyNULL, pyimport, pycopy!, pynew
+import PythonCall: pyisnull, PyNULL, pyimport, pycopy!, pynew, pyconvert
 
 # ------------------------------------------------------------------------
 # NOTE: the next few lines of wizardry and their call should not be

@@ -1,6 +1,7 @@
 using StableRNGs
 using MLJScikitLearnInterface
 using Test
+using PythonCall
 import MLJBase
 import ScikitLearn
 import MLJBase: target_scitype, input_scitype, output_scitype

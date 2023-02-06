@@ -313,10 +313,10 @@ macro sku_predict(modelname)
             if sm in (:Birch, :KMeans, :MiniBatchKMeans)
                 catv = MMI.categorical(1:m.n_clusters)
             elseif sm == :AffinityPropagation
-                nc   = length(fitres.cluster_centers_indices_)
+                nc   = length(pyconvert(Array, fitres.cluster_centers_))
                 catv = MMI.categorical(1:nc)
             elseif sm == :MeanShift
-                nc   = size(fitres.cluster_centers_, 1)
+                nc   = size(pyconvert(Array, fitres.cluster_centers_), 1)
                 catv = MMI.categorical(1:nc)
             else
                 throw(ArgumentError("Model $sm does not support `predict`."))

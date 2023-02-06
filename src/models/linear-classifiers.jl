@@ -197,7 +197,7 @@ const SGDClassifier_ = sklm(:SGDClassifier)
 end
 const ProbabilisticSGDClassifier_ = sklm(:SGDClassifier)
 @sk_clf mutable struct ProbabilisticSGDClassifier <: MMI.Probabilistic
-    loss::String          = "log"::(_ in ("log", "modified_huber")) # only those -> predict proba
+    loss::String          = "log_loss"::(_ in ("log_loss", "modified_huber")) # only those -> predict proba
     penalty::String       = "l2"::(_ in ("l1", "l2", "elasticnet", "none"))
     alpha::Float64        = 1e-4::(_ > 0)
     l1_ratio::Float64     = 0.15::(0 ≤ _ ≤ 1)

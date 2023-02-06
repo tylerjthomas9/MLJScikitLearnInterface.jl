@@ -1,21 +1,22 @@
 const AffinityPropagation_ = skcl(:AffinityPropagation)
 @sk_uns mutable struct AffinityPropagation <: MMI.Unsupervised
-    damping::Float64      = 0.5::(0.5 ≤ _ ≤ 1)
+    damping::Float64      = 0.5::(0.5 ≤ _ < 1)
     max_iter::Int         = 200::(_ ≥ 1)
     convergence_iter::Int = 15::(_ ≥ 1)
     copy::Bool            = true
     preference::Any       = nothing
     affinity::String      = "euclidean"::(_ in ("euclidean", "precomputed"))
     verbose::Bool         = false
+    random_state::Union{Int, Nothing} = nothing
 end
 @sku_predict AffinityPropagation
 function MMI.fitted_params(m::AffinityPropagation, f)
-    nc   = length(f.cluster_centers_indices_)
+    nc   = length(pyconvert(Array, f.cluster_centers_indices_))
     catv = MMI.categorical(1:nc)
     return (
         cluster_centers_indices = f.cluster_centers_indices_,
-        cluster_centers         = f.cluster_centers_,
-        labels                  = nc == 0 ? nothing : catv[f.labels_ .+ 1],
+        cluster_centers         = pyconvert(Array, f.cluster_centers_),
+        labels                  = nc == 0 ? nothing : catv[pyconvert(Array, f.labels_) .+ 1],
         affinity_matrix         = f.affinity_matrix_)
 end
 meta(AffinityPropagation,
@@ -30,7 +31,7 @@ meta(AffinityPropagation,
 const AgglomerativeClustering_ = skcl(:AgglomerativeClustering)
 @sk_uns mutable struct AgglomerativeClustering <: MMI.Unsupervised
     n_clusters::Int     = 2::(_ ≥ 1)
-    affinity::String    = "euclidean"::(_ in ("euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"))
+    metric::String    = "euclidean"::(_ in ("euclidean", "l1", "l2", "manhattan", "cosine", "precomputed"))
     memory::Any         = nothing
     connectivity::Any   = nothing
     compute_full_tree::Union{String,Bool} = "auto"::(_ isa Bool || _ == "auto")
@@ -38,11 +39,11 @@ const AgglomerativeClustering_ = skcl(:AgglomerativeClustering)
     distance_threshold::Option{Float64}   = nothing::(_ === nothing || _ > 0)
 end
 function MMI.fitted_params(m::AgglomerativeClustering, f)
-    nc   = f.n_clusters_
+    nc   = pyconvert(Int, f.n_clusters_)
     catv = MMI.categorical(1:nc)
     return (
         n_clusters = f.n_clusters_,
-        labels     = catv[f.labels_ .+ 1],
+        labels     = catv[pyconvert(Array, f.labels_) .+ 1],
         n_leaves   = f.n_leaves_,
         n_connected_components = f.n_connected_components_,
         children   = f.children_)
@@ -75,14 +76,14 @@ end
 @sku_predict Birch
 @sku_transform Birch
 function MMI.fitted_params(m::Birch, f)
-    nc   = m.n_clusters
+    nc   = pyconvert(Int, f.n_clusters)
     catv = MMI.categorical(1:nc)
     return (
         root               = f.root_,
         dummy_leaf         = f.dummy_leaf_,
         subcluster_centers = f.subcluster_centers_,
         subcluster_labels  = f.subcluster_labels_,
-        labels             = catv[f.labels_ .+ 1])
+        labels             = catv[pyconvert(Array, f.labels_) .+ 1])
 end
 meta(Birch,
     input   = Table(Continuous),
@@ -113,12 +114,12 @@ const DBSCAN_ = skcl(:DBSCAN)
     n_jobs::Option{Int} = nothing
 end
 function MMI.fitted_params(m::DBSCAN, f)
-    nc   = length(f.core_sample_indices_)
+    nc   = length(pyconvert(Array, f.core_sample_indices_))
     catv = MMI.categorical([-1, (1:nc)...])
     return (
         core_sample_indices = f.core_sample_indices_,
         components          = f.components_,
-        labels              = catv[f.labels_ .+ 2])
+        labels              = catv[pyconvert(Array, f.labels_) .+ 2])
 end
 meta(DBSCAN,
     input   = Table(Continuous),
@@ -143,23 +144,24 @@ const FeatureAgglomeration_ = skcl(:FeatureAgglomeration)
     connectivity::Any      = nothing
     # XXX unclear how to pass a proper callable here; just passing mean = nok
     # pooling_func::Function = mean
-    affinity::Any          = "euclidean"::(_ isa Function || _ in ("euclidean", "l1", "l2", "manhattan", "cosine",  "precomputed"))
+    metric::Any          = "euclidean"::(_ isa Function || _ in ("euclidean", "l1", "l2", "manhattan", "cosine",  "precomputed"))
     compute_full_tree::Union{String,Bool} = "auto"::(_ isa Bool || _ == "auto")
     linkage::String        = "ward"::(_ in ("ward", "complete", "average", "single"))
     distance_threshold::Option{Float64}   = nothing
+    computed_distances::Bool = false
 end
 @sku_transform FeatureAgglomeration
 @sku_inverse_transform FeatureAgglomeration
 function MMI.fitted_params(m::FeatureAgglomeration, f)
-    nc   = m.n_clusters
+    nc   = pyconvert(Int, f.n_clusters_)
     catv = MMI.categorical(1:nc)
     return (
-        n_clusters = f.n_clusters_,
-        labels     = catv[f.labels_ .+ 1],
+        n_clusters = nc,
+        labels     = catv[pyconvert(Array, f.labels_) .+ 1],
         n_leaves   = f.n_leaves_,
         n_connected_components = f.n_connected_components_,
         children   = f.children_,
-        distances  = m.distance_threshold === nothing ? nothing : f.distances_)
+        distances  = m.distance_threshold === nothing ? nothing : pyconvert(Array, f.distances_))
 end
 meta(FeatureAgglomeration,
     input   = Table(Continuous),
@@ -186,18 +188,18 @@ const KMeans_ = skcl(:KMeans)
     verbose::Int        = 0::(_ ≥ 0)
     random_state::Any   = nothing
     copy_x::Bool        = true
-    algorithm::String   = "auto"::(_ in ("auto", "full", "elkane"))
+    algorithm::String   = "lloyd"::(_ in ("lloyd", "elkane"))
     # long
     init::Union{AbstractArray,String}        = "k-means++"::(_ isa AbstractArray || _ in ("k-means++", "random"))
 end
 @sku_transform KMeans
 @sku_predict KMeans
 function MMI.fitted_params(m::KMeans, f)
-    nc   = m.n_clusters
+    nc   = pyconvert(Int, f.n_clusters)
     catv = MMI.categorical(1:nc)
     return (
-        cluster_centers = f.cluster_centers_,
-        labels          = catv[f.labels_ .+ 1],
+        cluster_centers = pyconvert(Array, f.cluster_centers_),
+        labels          = catv[pyconvert(Array, f.labels_) .+ 1],
         inertia         = f.inertia_)
 end
 meta(KMeans,
@@ -233,11 +235,11 @@ end
 @sku_predict MiniBatchKMeans
 @sku_transform MiniBatchKMeans
 function MMI.fitted_params(m::MiniBatchKMeans, f)
-    nc   = m.n_clusters
+    nc   = pyconvert(Int, f.n_clusters)
     catv = MMI.categorical(1:nc)
     return (
-        cluster_centers = f.cluster_centers_,
-        labels          = catv[f.labels_ .+ 1],
+        cluster_centers = pyconvert(Array, f.cluster_centers_),
+        labels          = catv[pyconvert(Array, f.labels_) .+ 1],
         inertia         = f.inertia_)
 end
 meta(MiniBatchKMeans,
@@ -262,11 +264,11 @@ end
 @sku_predict MeanShift
 
 function MMI.fitted_params(m::MeanShift, f)
-    nc   = size(f.cluster_centers_, 1)
+    nc   = size(pyconvert(Array, f.cluster_centers_), 1)
     catv = MMI.categorical(1:nc)
     return (
-        cluster_centers = f.cluster_centers_,
-        labels          = catv[f.labels_ .+ 1])
+        cluster_centers = pyconvert(Array, f.cluster_centers_),
+        labels          = catv[pyconvert(Array, f.labels_) .+ 1])
 end
 meta(MeanShift,
     input   = Table(Continuous),
@@ -307,7 +309,7 @@ function MMI.fitted_params(m::OPTICS, f)
     nc   = size(f.cluster_hierarchy_, 1)
     catv = MMI.categorical([-1, (1:nc)...])
     return (
-        labels            = catv[f.labels_ .+ 2],
+        labels            = catv[pyconvert(Array, f.labels_) .+ 2],
         reachability      = f.reachability_,
         ordering          = f.ordering_,
         core_distances    = f.core_distances_,
@@ -347,10 +349,10 @@ const SpectralClustering_ = skcl(:SpectralClustering)
     n_jobs::Option{Int}   = nothing
 end
 function MMI.fitted_params(m::SpectralClustering, f)
-    nc   = m.n_clusters
+    nc   = pyconvert(Int, f.n_clusters)
     catv = MMI.categorical(1:nc)
     return (
-        labels          = catv[f.labels_ .+ 1],
+        labels          = catv[pyconvert(Array, f.labels_) .+ 1],
         affinity_matrix = f.affinity_matrix_)
 end
 meta(SpectralClustering,

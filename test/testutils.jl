@@ -34,9 +34,9 @@ function test_regression_2(m, X, y, ls)
     return sqrt(sum(abs2, vec(MB.matrix(y) .- MB.matrix(ŷ)))) / ls, f
 end
 
-function simple_binaryclf(n=100, p=3; sigma=0.1, seed=616866614)
-    X, y = SKD.make_blobs(n_samples=n, n_features=p, centers=2, random_state=seed)
-    return MB.table(X), MB.categorical(y)
+function simple_binaryclf(n=100, p=3; centers=2, seed=616866614)
+    X, y = SKD.make_blobs(n_samples=n, n_features=p, centers=centers, random_state=seed)
+    return MB.table(pyconvert(Array, X)), MB.categorical(pyconvert(Array, y))
 end
 
 function test_clf(m, X, y)

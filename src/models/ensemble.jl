@@ -1,6 +1,6 @@
 const AdaBoostRegressor_ = sken(:AdaBoostRegressor)
 @sk_reg mutable struct AdaBoostRegressor <: MMI.Deterministic
-    base_estimator::Any    = nothing
+    estimator::Any    = nothing
     n_estimators::Int      = 50::(_ > 0)
     learning_rate::Float64 = 1.0::(_ > 0)
     loss::String           = "linear"::(_ in ("linear","square","exponential"))
@@ -17,7 +17,7 @@ add_human_name_trait(AdaBoostRegressor, "AdaBoost ensemble regression")
 # ----------------------------------------------------------------------------
 const AdaBoostClassifier_ = sken(:AdaBoostClassifier)
 @sk_clf mutable struct AdaBoostClassifier <: MMI.Probabilistic
-    base_estimator::Any    = nothing
+    estimator::Any    = nothing
     n_estimators::Int      = 50::(_ > 0)
     learning_rate::Float64 = 1.0::(_ > 0)
     algorithm::String      = "SAMME.R"::(_ in ("SAMME", "SAMME.R"))
@@ -39,7 +39,7 @@ meta(AdaBoostClassifier,
 # ============================================================================
 const BaggingRegressor_ = sken(:BaggingRegressor)
 @sk_reg mutable struct BaggingRegressor <: MMI.Deterministic
-    base_estimator::Any      = nothing
+    estimator::Any      = nothing
     n_estimators::Int        = 10::(_>0)
     max_samples::Union{Int,Float64}  = 1.0::(_>0)
     max_features::Union{Int,Float64} = 1.0::(_>0)
@@ -63,7 +63,7 @@ add_human_name_trait(BaggingRegressor, "bagging ensemble regressor")
 # ----------------------------------------------------------------------------
 const BaggingClassifier_ = sken(:BaggingClassifier)
 @sk_clf mutable struct BaggingClassifier <: MMI.Probabilistic
-    base_estimator::Any      = nothing
+    estimator::Any      = nothing
     n_estimators::Int        = 10::(_>0)
     max_samples::Union{Int,Float64}  = 1.0::(_>0)
     max_features::Union{Int,Float64} = 1.0::(_>0)
@@ -76,7 +76,7 @@ const BaggingClassifier_ = sken(:BaggingClassifier)
     verbose::Int             = 0
 end
 MMI.fitted_params(m::BaggingClassifier, (f, _, _)) = (
-    base_estimator        = f.base_estimator_,
+    estimator             = f.estimator_,
     estimators            = f.estimators_,
     estimators_samples    = f.estimators_samples_,
     estimators_features   = f.estimators_features_,
@@ -95,7 +95,7 @@ meta(BaggingClassifier,
 # ============================================================================
 const GradientBoostingRegressor_ = sken(:GradientBoostingRegressor)
 @sk_reg mutable struct GradientBoostingRegressor <: MMI.Deterministic
-    loss::String                    = "ls"::(_ in ("ls","lad","huber","quantile"))
+    loss::String                    = "squared_error"::(_ in ("squared_error","absolute_error","huber","quantile"))
     learning_rate::Float64          = 0.1::(_>0)
     n_estimators::Int               = 100::(_>0)
     subsample::Float64              = 1.0::(_>0)
@@ -120,7 +120,6 @@ end
 MMI.fitted_params(m::GradientBoostingRegressor, (f, _, _)) = (
     feature_importances = f.feature_importances_,
     train_score         = f.train_score_,
-    loss                = f.loss_,
     init                = f.init_,
     estimators          = f.estimators_,
     oob_improvement     = m.subsample < 1 ? f.oob_improvement_ : nothing
@@ -130,7 +129,7 @@ add_human_name_trait(GradientBoostingRegressor, "gradient boosting ensemble regr
 # ----------------------------------------------------------------------------
 const GradientBoostingClassifier_ = sken(:GradientBoostingClassifier)
 @sk_clf mutable struct GradientBoostingClassifier <: MMI.Probabilistic
-    loss::String                    = "deviance"::(_ in ("deviance","exponential"))
+    loss::String                    = "log_loss"::(_ in ("log_loss","exponential"))
     learning_rate::Float64          = 0.1::(_>0)
     n_estimators::Int               = 100::(_>0)
     subsample::Float64              = 1.0::(_>0)
@@ -155,7 +154,6 @@ MMI.fitted_params(m::GradientBoostingClassifier, (f, _, _)) = (
     n_estimators        = f.n_estimators_,
     feature_importances = f.feature_importances_,
     train_score         = f.train_score_,
-    loss                = f.loss_,
     init                = f.init_,
     estimators          = f.estimators_,
     oob_improvement     = m.subsample < 1 ? f.oob_improvement_ : nothing
@@ -170,12 +168,12 @@ meta(GradientBoostingClassifier,
 const RandomForestRegressor_ = sken(:RandomForestRegressor)
 @sk_reg mutable struct RandomForestRegressor <: MMI.Deterministic
     n_estimators::Int              = 100::(_ > 0)
-    criterion::String              = "mse"::(_ in ("mae", "mse"))
+    criterion::String              = "squared_error"::(_ in ("squared_error","absolute_error","friedman_mse","poisson"))
     max_depth::Option{Int}         = nothing::(_ === nothing || _ > 0)
     min_samples_split::Union{Int,Float64} = 2::(_ > 0)
     min_samples_leaf::Union{Int,Float64}  = 1::(_ > 0)
     min_weight_fraction_leaf::Float64     = 0.0::(_ ≥ 0)
-    max_features::Union{Int,Float64,String,Nothing} = "auto"::(_ === nothing || (isa(_, String) && (_ in ("auto","sqrt","log2"))) || _ > 0)
+    max_features::Union{Int,Float64,String,Nothing} = 1.0::(_ === nothing || (isa(_, String) && (_ in ("sqrt","log2"))) || _ > 0)
     max_leaf_nodes::Option{Int}    = nothing::(_ === nothing || _ > 0)
     min_impurity_decrease::Float64 = 0.0::(_ ≥ 0)
     bootstrap::Bool                = true
@@ -191,7 +189,7 @@ end
 MMI.fitted_params(model::RandomForestRegressor, (f, _, _)) = (
     estimators          = f.estimators_,
     feature_importances = f.feature_importances_,
-    n_features          = f.n_features_,
+    n_features          = f.n_features_in_,
     n_outputs           = f.n_outputs_,
     oob_score           = model.oob_score ? f.oob_score_ : nothing,
     oob_prediction      = model.oob_score ? f.oob_prediction_ : nothing
@@ -211,7 +209,7 @@ const RandomForestClassifier_ = sken(:RandomForestClassifier)
     min_samples_split::Union{Int,Float64} = 2::(_ > 0)
     min_samples_leaf::Union{Int,Float64}  = 1::(_ > 0)
     min_weight_fraction_leaf::Float64     = 0.0::(_ ≥ 0)
-    max_features::Union{Int,Float64,String,Nothing} = "auto"::(_ === nothing || (isa(_, String) && (_ in ("auto","sqrt","log2"))) || _ > 0)
+    max_features::Union{Int,Float64,String,Nothing} = 1.0::(_ === nothing || (isa(_, String) && (_ in ("sqrt","log2"))) || _ > 0)
     max_leaf_nodes::Option{Int}    = nothing::(_ === nothing || _ > 0)
     min_impurity_decrease::Float64 = 0.0::(_ ≥ 0)
     bootstrap::Bool                = true
@@ -229,7 +227,7 @@ MMI.fitted_params(m::RandomForestClassifier, (f, _, _)) = (
     estimators            = f.estimators_,
     classes               = f.classes_,
     n_classes             = f.n_classes_,
-    n_features            = f.n_features_,
+    n_features            = f.n_features_in_,
     n_outputs             = f.n_outputs_,
     feature_importances   = f.feature_importances_,
     oob_score             = m.oob_score ? f.oob_score_ : nothing,
@@ -250,12 +248,12 @@ MMI.target_scitype(::ENSEMBLE_REG) = AbstractVector{Continuous}
 const ExtraTreesRegressor_ = sken(:ExtraTreesRegressor)
 @sk_reg mutable struct ExtraTreesRegressor <: MMI.Deterministic
     n_estimators::Int              = 100::(_>0)
-    criterion::String              = "mse"::(_ in ("mae", "mse"))
+    criterion::String              = "squared_error"::(_ in ("squared_error","absolute_error","friedman_mse","poisson"))
     max_depth::Option{Int}         = nothing::(_ === nothing || _ > 0)
     min_samples_split::Union{Int,Float64}  = 2::(_ > 0)
     min_samples_leaf::Union{Int,Float64}   = 1::(_ > 0)
     min_weight_fraction_leaf::Float64      = 0.0::(_ ≥ 0)
-    max_features::Union{Int,Float64,String,Nothing} = "auto"::(_ === nothing || (isa(_, String) && (_ in ("auto","sqrt","log2"))) || _ > 0)
+    max_features::Union{Int,Float64,String,Nothing} = "sqrt"::(_ === nothing || (isa(_, String) && (_ in ("sqrt","log2"))) || _ > 0)
     max_leaf_nodes::Option{Int}    = nothing::(_ === nothing || _ > 0)
     min_impurity_decrease::Float64 = 0.0::(_ ≥ 0)
     bootstrap::Bool                = true
@@ -268,7 +266,7 @@ end
 MMI.fitted_params(m::ExtraTreesRegressor, (f, _, _)) = (
     estimators          = f.estimators_,
     feature_importances = f.feature_importances_,
-    n_features          = f.n_features_,
+    n_features          = f.n_features_in_,
     n_outputs           = f.n_outputs_,
     oob_score           = m.oob_score ? f.oob_score_ : nothing,
     oob_prediction      = m.oob_score ? f.oob_prediction_ : nothing,
@@ -298,7 +296,7 @@ const ExtraTreesClassifier_ = sken(:ExtraTreesClassifier)
     min_samples_split::Union{Int,Float64}  = 2::(_ > 0)
     min_samples_leaf::Union{Int,Float64}   = 1::(_ > 0)
     min_weight_fraction_leaf::Float64      = 0.0::(_ ≥ 0)
-    max_features::Union{Int,Float64,String,Nothing} = "auto"::(_ === nothing || (isa(_, String) && (_ in ("auto","sqrt","log2"))) || _ > 0)
+    max_features::Union{Int,Float64,String,Nothing} = "sqrt"::(_ === nothing || (isa(_, String) && (_ in ("sqrt","log2"))) || _ > 0)
     max_leaf_nodes::Option{Int}    = nothing::(_ === nothing || _ > 0)
     min_impurity_decrease::Float64 = 0.0::(_ ≥ 0)
     bootstrap::Bool                = true
@@ -314,7 +312,7 @@ MMI.fitted_params(m::ExtraTreesClassifier, (f, _, _)) = (
     classes               = f.classes_,
     n_classes             = f.n_classes_,
     feature_importances   = f.feature_importances_,
-    n_features            = f.n_features_,
+    n_features            = f.n_features_in_,
     n_outputs             = f.n_outputs_,
     oob_score             = m.oob_score ? f.oob_score_ : nothing,
     oob_decision_function = m.oob_score ? f.oob_decision_function_ : nothing,
