@@ -38,7 +38,7 @@ jobs:
       - name: "Export LD_LIBRARY_PATH envrioment variable on ubuntu + julia v1.6"
         if: ${{matrix.version == '1.6'}} && ${{matrix.os == 'ubuntu-latest'}}
         run: |
-              julia --project -e "using Pkg; Pkg.add("Conda"); Pkg.build("Conda")"
+              julia --project -e 'using Pkg; Pkg.add(\"Conda\"); Pkg.build(\"Conda\")'
               echo "LD_LIBRARY_PATH=/home/runner/.julia/conda/3/x86_64/lib" >> $GITHUB_ENV
       - uses: julia-actions/julia-runtest@v1
         if: ${{matrix.version == '1.6'}} && ${{matrix.os == 'ubuntu-latest'}}
