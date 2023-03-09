@@ -1,3 +1,8 @@
+
+if VERSION < v"1.8.4"
+    Base.BinaryPlatforms.detect_libstdcxx_version() = "v3.4.30"
+end
+
 using StableRNGs
 using MLJScikitLearnInterface
 using Test
