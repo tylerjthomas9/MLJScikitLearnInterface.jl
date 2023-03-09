@@ -4,7 +4,7 @@ models = (
     PassiveAggressiveClassifier,
     PerceptronClassifier,
     RidgeClassifier,
-    # RidgeCVClassifier,
+    RidgeCVClassifier,
     SGDClassifier,
     ProbabilisticSGDClassifier,
     )
@@ -15,7 +15,7 @@ fparams = (
     PassiveAggressiveClassifier=(:coef, :intercept),
     PerceptronClassifier=(:coef, :intercept),
     RidgeClassifier=(:coef, :intercept),
-    # RidgeCVClassifier=(:coef, :intercept),
+    RidgeCVClassifier=(:coef, :intercept),
     SGDClassifier=(:coef, :intercept),
     ProbabilisticSGDClassifier=(:coef, :intercept)
     )
