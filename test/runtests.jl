@@ -13,6 +13,7 @@ const MB = MLJBase
 
 const sklearn_version = pyconvert(String, MLJScikitLearnInterface.ScikitLearnAPI.sklearn.__version__)
 println("Running tests with scikit-learn v$sklearn_version")
+println("Python executable directory: $(PythonCall.C.CTX.exe_path)")
 
 include("testutils.jl")
 include("macros.jl")
