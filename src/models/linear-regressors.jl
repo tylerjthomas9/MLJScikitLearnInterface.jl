@@ -406,6 +406,7 @@ const RidgeCVRegressor_ = sklm(:RidgeCV)
     scoring::Any             = nothing
     cv::Any                  = 5
     gcv_mode::Option{String} = nothing::(_ === nothing || _ in ("auto","svd","eigen"))
+    #TODO: Use `store_cv_results` in v1.6+
     store_cv_values::Bool    = false
 end
 MMI.fitted_params(model::RidgeCVRegressor, (fitresult, _, _)) = (
