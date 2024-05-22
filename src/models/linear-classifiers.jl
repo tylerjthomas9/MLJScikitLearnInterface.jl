@@ -10,6 +10,7 @@ const LogisticClassifier_ = sklm(:LogisticRegression)
     random_state::Any          = nothing
     solver::String             = "lbfgs"::(_ in ("lbfgs", "newton-cg", "liblinear", "sag", "saga"))
     max_iter::Int              = 100::(_ > 0)
+    #TODO: Remove `multi_class` in v1.7+
     multi_class::String        = "auto"::(_ in ("ovr", "multinomial", "auto"))
     verbose::Int               = 0
     warm_start::Bool           = false
@@ -157,6 +158,7 @@ const RidgeCVClassifier_ = sklm(:RidgeClassifierCV)
     scoring::Any          = nothing
     cv::Int               = 5
     class_weight::Any     = nothing
+    #TODO: Use `store_cv_results` in v1.6+
     store_cv_values::Bool = false
 end
 MMI.fitted_params(m::RidgeCVClassifier, (f, _, _)) = (

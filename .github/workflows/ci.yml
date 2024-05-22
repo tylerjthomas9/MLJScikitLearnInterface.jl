@@ -30,11 +30,11 @@ jobs:
     continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: julia-actions/cache@v1
+      - uses: julia-actions/cache@v2
       - name: "Replace julia libstdcxx ubuntu + julia v1.6"
         if: ${{ matrix.version == '1.6' && matrix.os == 'ubuntu-latest' }}
         # The following is needed for Julia <=1.8.3 on Linux OS 

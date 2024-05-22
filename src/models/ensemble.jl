@@ -36,6 +36,7 @@ const AdaBoostClassifier_ = sken(:AdaBoostClassifier)
     estimator::Any    = nothing
     n_estimators::Int      = 50::(_ > 0)
     learning_rate::Float64 = 1.0::(_ > 0)
+    #TODO: Remove `SAMME.R` in v1.6
     algorithm::String      = "SAMME.R"::(_ in ("SAMME", "SAMME.R"))
     random_state::Any      = nothing
 end
