@@ -18,15 +18,18 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
+          - '1.10'
           - '1'
-          - 'nightly'
         os:
           - ubuntu-latest
           - macOS-latest
           - windows-latest
         arch:
           - x64
+      include:
+          - os: macOS-latest
+            version: '1'
+            arch: arm64
     continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
       - uses: actions/checkout@v4
